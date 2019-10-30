@@ -37,9 +37,13 @@ import sys
 import json
 import os
 import time
+from datetime import datetime,timedelta
+from pytz import timezone
 
 __version__ = "0.2"
 __all__ = ['NordSpoolSpot', 'convert_data']
+
+TIMEZONE = 'Europe/Paris'
 
 class NordSpoolSpot(object):
     """ NordSpoolSpot JSON parser """
@@ -63,20 +67,21 @@ class NordSpoolSpot(object):
         self._check_data()
         os.environ['TZ'] = 'CET'
         time.tzset()
+        last_starttime = None
         for row_ in self._serverjson['data']['Rows']:
             if row_['IsExtraRow']:
                 continue
-            st_ = time.strptime(row_['StartTime'] + ' CET',
-                                '%Y-%m-%dT%H:%M:%S %Z')
-            ts_ = int(time.mktime(st_))
+            ts_ = parsetime(row_['StartTime'], row_['StartTime'] !=
+                            last_starttime)
+            last_starttime = row_['StartTime']
             for col_ in row_['Columns']:
                 if col_['Value'] == '-':
-                    continue
+                    break
                 self._pricedata.append({
                     'timestamp': ts_,
                     'val': col_['Value'].replace(',', '.')
                     })
-                ts_ = ts_ - (24 * 3600)
+                break
 
     def get_data(self):
         """ Get parsed NordSpoolSpot price data
@@ -102,6 +107,13 @@ def convert_data():
     with sys.stdout:
         json.dump(obj, sys.stdout, sort_keys=True, indent=4)
         sys.stdout.write('\n')
+
+
+def parsetime(timestr, is_dst=True):
+    _st = time.strptime(timestr, '%Y-%m-%dT%H:%M:%S')
+    _dt = datetime(_st.tm_year, _st.tm_mon, _st.tm_mday, _st.tm_hour,
+                    _st.tm_min, _st.tm_sec)
+    return int(datetime.timestamp(timezone(TIMEZONE).localize(_dt, is_dst=is_dst)))
 
 
 if __name__ == '__main__':
