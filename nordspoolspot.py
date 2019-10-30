@@ -70,6 +70,8 @@ class NordSpoolSpot(object):
                                 '%Y-%m-%dT%H:%M:%S %Z')
             ts_ = int(time.mktime(st_))
             for col_ in row_['Columns']:
+                if col_['Value'] == '-':
+                    continue
                 self._pricedata.append({
                     'timestamp': ts_,
                     'val': col_['Value'].replace(',', '.')
