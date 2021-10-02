@@ -24,7 +24,7 @@ timestamp and 'val' is a price value (decimal string)
 SQL database schema:
 
     CREATE TABLE IF NOT EXISTS `price` (
-      `time` datetime NOT NULL,
+      `time` timestamp NOT NULL,
       `price` decimal(5,2) NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -69,6 +69,7 @@ class PriceToSql(object):
                                             password=self._dbpassword,
                                             host=self._dbhost,
                                             database=self._db)
+        self._cnx.cursor().execute("SET SESSION time_zone = '+0:00'")
 
     def update(self, data):
         """ Update price data in database
@@ -77,20 +78,20 @@ class PriceToSql(object):
         """
         cursor_ = self._cnx.cursor(buffered=True)
         searchquery_ = ("SELECT price FROM " + self._table + " "
-                        "WHERE time = %(dt)s")
+                        "WHERE time = FROM_UNIXTIME(%(timestamp_)s)")
         updatequery_ = ("INSERT INTO " + self._table + " "
                         "(time, price) "
-                        "VALUES (%s, %s)")
+                        "VALUES (FROM_UNIXTIME(%s), %s)")
         for entry_ in data:
-            dt_ = datetime.datetime.utcfromtimestamp(entry_['timestamp'])
+            timestamp_ = decimal.Decimal(entry_['timestamp'])
             val_ = decimal.Decimal(entry_['val'])
-            cursor_.execute(searchquery_, {'dt': dt_})
+            cursor_.execute(searchquery_, {'timestamp_': timestamp_})
             for price_ in list(cursor_):
                 if price_[0].compare(val_):
-                    raise Exception('db entry for %s is %s but should be %s'
-                                    % (dt_, price_[0], val_))
+                    raise Exception('db entry for %s UTC (%d) is %s but should be %s'
+                                    % (datetime.datetime.utcfromtimestamp(entry_['timestamp']), entry_['timestamp'], price_[0], val_))
             if not cursor_.rowcount:
-                cursor_.execute(updatequery_, (dt_, val_))
+                cursor_.execute(updatequery_, (timestamp_, val_))
                 log.info('SQL added %d line: %s',
                           cursor_.rowcount, cursor_.statement)
         self._cnx.commit()
