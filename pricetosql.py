@@ -25,7 +25,7 @@ SQL database schema:
 
     CREATE TABLE IF NOT EXISTS `price` (
       `time` timestamp NOT NULL,
-      `price` decimal(5,2) NOT NULL
+      `price` decimal(6,2) NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
     ALTER TABLE `price`

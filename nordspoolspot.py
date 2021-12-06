@@ -79,7 +79,7 @@ class NordSpoolSpot(object):
                     break
                 self._pricedata.append({
                     'timestamp': ts_,
-                    'val': col_['Value'].replace(',', '.')
+                    'val': col_['Value'].replace(',', '.').replace(' ','')
                     })
                 break
 
