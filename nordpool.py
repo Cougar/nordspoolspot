@@ -37,7 +37,7 @@ import sys
 import json
 from datetime import datetime, timezone
 
-__version__ = "0.3"
+__version__ = "0.3.1"
 __all__ = ['NordPool', 'convert_data']
 
 class NordPool(object):
@@ -49,7 +49,7 @@ class NordPool(object):
     def _check_data(self):
         """ Simple JSON vaidation check
         """
-        if self._serverjson['version'] != 3:
+        if not self._serverjson['version'] in [2, 3]:
             raise Exception(
                     f"unknown version {self._serverjson['version']}")
         if len(self._serverjson['deliveryAreas']) != 1:
