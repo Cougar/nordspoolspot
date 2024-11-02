@@ -50,15 +50,15 @@ class NordPool(object):
         """ Simple JSON vaidation check
         """
         if self._serverjson['version'] != 3:
-            raise Exception('unknown version %s',
-                            self._serverjson['version'])
+            raise Exception(
+                    f"unknown version {self._serverjson['version']}")
         if len(self._serverjson['deliveryAreas']) != 1:
-            raise Exception('Only one area is supported')
+            raise Exception("Only one area is supported")
         if self._serverjson['currency'] != 'EUR':
-            raise Exception('unknown currency %s',
-                            self._serverjson['currency'])
+            raise Exception(
+                    f"unknown currency {self._serverjson['currency']}")
         if self._serverjson['areaStates'][0]['state'] != 'Final':
-            raise Exception('Not a final data')
+            raise Exception("Not a final data")
 
     def _parse_data(self):
         """ Parse original Nord Pool JSON to simple time/price list
