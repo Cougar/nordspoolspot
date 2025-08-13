@@ -48,7 +48,7 @@ logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 __version__ = "0.2"
 __all__ = ["EleringUsage", "convert_data"]
 
-TIMEZONE = "Europe/Tallinn"
+TIMEZONE = "UTC"
 
 
 class EleringUsage(object):
